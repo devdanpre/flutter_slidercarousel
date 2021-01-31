@@ -297,7 +297,7 @@ class _SliderCarouselState extends _SliderCarouselTimerMixin {
 
   @override
   Widget build(BuildContext context) {
-    Widget SliderCarousel = _buildSliderCarousel();
+    Widget sliderCarousel = _buildSliderCarousel();
     List<Widget> listForStack;
     if (listForStack != null) {
       return new Stack(
@@ -305,7 +305,7 @@ class _SliderCarouselState extends _SliderCarouselTimerMixin {
       );
     }
 
-    return SliderCarousel;
+    return sliderCarousel;
   }
 
 }
@@ -405,13 +405,13 @@ class _StackViewState extends _CustomLayoutStateBase<_StackSliderCarousel> {
 
   void _updateValues() {
     if (widget.scrollDirection == Axis.horizontal) {
-      double space = (_SliderCarouselWidth - widget.itemWidth) / 2;
+      double space = (_sliderWidth - widget.itemWidth) / 2;
       double spaceItem = scales[3]>1?(widget.itemWidth*(scales[3]-1))/2:0;
-      offsets = [-space, space*widget.offsetCenter, -space*widget.offsetCenter, -spaceItem, _SliderCarouselWidth];
+      offsets = [-space, space*widget.offsetCenter, -space*widget.offsetCenter, -spaceItem, _sliderWidth];
     } else {
-      double space = (_SliderCarouselHeight - widget.itemHeight) / 2;
+      double space = (_sliderHeight - widget.itemHeight) / 2;
       double spaceItem = scales[3]>1?(widget.itemHeight*(scales[3]-1))/2:0;
-      offsets = [-space, space*widget.offsetCenter, -space*widget.offsetCenter, -spaceItem, _SliderCarouselHeight];
+      offsets = [-space, space*widget.offsetCenter, -space*widget.offsetCenter, -spaceItem, _sliderHeight];
     }
   }
 

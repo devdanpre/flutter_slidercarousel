@@ -2,8 +2,8 @@ part of 'slidercarousel.dart';
 
 abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends State<T>
     with SingleTickerProviderStateMixin {
-  double _SliderCarouselWidth;
-  double _SliderCarouselHeight;
+  double _sliderWidth;
+  double _sliderHeight;
   Animation<double> _animation;
   AnimationController _animationController;
   int _startIndex;
@@ -41,8 +41,8 @@ abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends Stat
   void afterRender() {
     RenderObject renderObject = context.findRenderObject();
     Size size = renderObject.paintBounds.size;
-    _SliderCarouselWidth = size.width;
-    _SliderCarouselHeight = size.height;
+    _sliderWidth = size.width;
+    _sliderHeight = size.height;
     setState(() {});
   }
 
@@ -227,7 +227,7 @@ abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends Stat
                     ? details.globalPosition.dx
                     : details.globalPosition.dy) -
                 _currentPos) /
-            _SliderCarouselWidth /
+            _sliderWidth /
             2;
     // no loop ?
     if (!widget.loop) {

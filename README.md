@@ -21,7 +21,7 @@ A new slider carousel widget with custom scaling and item spacing
     );
 
 
-![](https://github.com/devdanpre/flutter_slidercarousel/example/images/screenshot.gif)
+![](https://github.com/devdanpre/flutter_slidercarousel/blob/main/example/images/screenshot.gif)
 
 
 

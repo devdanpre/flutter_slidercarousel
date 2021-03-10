@@ -54,6 +54,8 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: SliderCarousel(
           itemCount: 5,
+          onIndexChanged: (index)=>print("onIndexChanged: "+index.toString()),
+          onTap: (index)=>print("onTap: "+index.toString()),
           itemBuilder: (context, idx) {
             return Container(
               decoration: BoxDecoration(

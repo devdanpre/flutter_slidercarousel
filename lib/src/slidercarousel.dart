@@ -33,6 +33,7 @@ class SliderCarousel extends StatefulWidget {
   final bool loop;
   final int index;
   final SliderCarouselController controller;
+  final SliderCarouselOnTap onTap;
 
   SliderCarousel({
     Key key,
@@ -52,6 +53,7 @@ class SliderCarousel extends StatefulWidget {
     this.scrollDirection: Axis.horizontal,
     this.offsetCenter = 0.75,
     this.scaleCenter = 1.25,
+    this.onTap,
   })  : super(key: key);
 
   factory SliderCarousel.children({
@@ -71,6 +73,7 @@ class SliderCarousel extends StatefulWidget {
     double itemWidth,
     double offsetCenter,
     double scaleCenter,
+    SliderCarouselOnTap onTap,
   }) {
     assert(children != null, "children must not be null");
 
@@ -93,6 +96,7 @@ class SliderCarousel extends StatefulWidget {
         },
         offsetCenter: offsetCenter,
         scaleCenter: scaleCenter,
+        onTap: onTap,
         itemCount: children.length);
   }
 
@@ -116,6 +120,7 @@ class SliderCarousel extends StatefulWidget {
     double itemWidth,
     double offsetCenter,
     double scaleCenter,
+    SliderCarouselOnTap onTap,
   }) {
     return new SliderCarousel(
         itemHeight: itemHeight,
@@ -136,6 +141,7 @@ class SliderCarousel extends StatefulWidget {
         },
         offsetCenter: offsetCenter,
         scaleCenter: scaleCenter,
+        onTap: onTap,
         itemCount: list.length);
   }
 
@@ -238,6 +244,17 @@ class _SliderCarouselState extends _SliderCarouselTimerMixin {
   int _activeIndex;
 
   TransformerPageController _pageController;
+
+  Widget _wrapTap(BuildContext context, int index) {
+    return new GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        this.widget.onTap(index);
+      },
+      child: widget.itemBuilder(context, index),
+    );
+  }
+
   @override
   void initState() {
     _activeIndex = widget.index ?? 0;
@@ -276,8 +293,12 @@ class _SliderCarouselState extends _SliderCarouselTimerMixin {
 
   Widget _buildSliderCarousel() {
     IndexedWidgetBuilder itemBuilder;
-    itemBuilder = widget.itemBuilder;
 
+    if (widget.onTap != null) {
+      itemBuilder = _wrapTap;
+    } else {
+      itemBuilder = widget.itemBuilder;
+    }
     return new _StackSliderCarousel(
       loop: widget.loop,
       itemWidth: widget.itemWidth,

@@ -1,13 +1,18 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+
 import 'package:flutter/foundation.dart';
-import 'package:flutter_slidercarousel/flutter_slidercarousel.dart';
-import 'package:transformer_page_view/transformer_page_view.dart';
+import 'package:flutter/material.dart';
+
+import '../../transformer_page_view/index_controller.dart';
+import '../../transformer_page_view/transformer_page_view.dart';
+import 'slider_controller.dart';
+
 part 'custom_layout.dart';
 
 typedef void SliderCarouselOnTap(int index);
 
-typedef Widget SliderCarouselDataBuilder(BuildContext context, dynamic data, int index);
+typedef Widget SliderCarouselDataBuilder(
+    BuildContext context, dynamic data, int index);
 
 /// default auto play
 const int defaultAutoplayDelayMs = 3000;
@@ -15,15 +20,14 @@ const int defaultAutoplayDelayMs = 3000;
 ///  Default auto play transition duration (in millisecond)
 const int defaultAutoplayTransactionDuration = 300;
 
-
 class SliderCarousel extends StatefulWidget {
-  final double itemHeight;
-  final double itemWidth;
+  final double? itemHeight;
+  final double? itemWidth;
   final double offsetCenter;
   final double scaleCenter;
-  final IndexedWidgetBuilder itemBuilder;
+  final IndexedWidgetBuilder? itemBuilder;
   final int itemCount;
-  final ValueChanged<int> onIndexChanged;
+  final ValueChanged<int>? onIndexChanged;
   final bool autoplay;
   final int autoplayDelay;
   final bool autoplayDisableOnInteraction;
@@ -31,12 +35,11 @@ class SliderCarousel extends StatefulWidget {
   final Axis scrollDirection;
   final Curve curve;
   final bool loop;
-  final int index;
-  final SliderCarouselController controller;
-  final SliderCarouselOnTap onTap;
+  final int? index;
+  final SliderCarouselController? controller;
 
   SliderCarousel({
-    Key key,
+    Key? key,
     this.curve: Curves.ease,
     this.duration: defaultAutoplayTransactionDuration,
     this.controller,
@@ -49,31 +52,29 @@ class SliderCarousel extends StatefulWidget {
     this.autoplay: false,
     this.autoplayDelay: defaultAutoplayDelayMs,
     this.autoplayDisableOnInteraction: true,
-    @required this.itemCount,
+    required this.itemCount,
     this.scrollDirection: Axis.horizontal,
     this.offsetCenter = 0.75,
     this.scaleCenter = 1.25,
-    this.onTap,
-  })  : super(key: key);
+  }) : super(key: key);
 
   factory SliderCarousel.children({
-    List<Widget> children,
+    List<Widget>? children,
     bool autoplay: false,
     int autoplayDelay: defaultAutoplayDelayMs,
     bool autoplayDisableOnInteraction: true,
     int duration: defaultAutoplayTransactionDuration,
-    ValueChanged<int> onIndexChanged,
-    int index,
+    ValueChanged<int>? onIndexChanged,
+    int? index,
     bool loop: true,
     Curve curve: Curves.ease,
     Axis scrollDirection: Axis.horizontal,
-    SliderCarouselController controller,
-    Key key,
-    double itemHeight,
-    double itemWidth,
-    double offsetCenter,
-    double scaleCenter,
-    SliderCarouselOnTap onTap,
+    SliderCarouselController? controller,
+    Key? key,
+    double? itemHeight,
+    double? itemWidth,
+    double? offsetCenter,
+    double? scaleCenter,
   }) {
     assert(children != null, "children must not be null");
 
@@ -92,35 +93,33 @@ class SliderCarousel extends StatefulWidget {
         loop: loop,
         key: key,
         itemBuilder: (BuildContext context, int index) {
-          return children[index];
+          return children![index];
         },
-        offsetCenter: offsetCenter,
-        scaleCenter: scaleCenter,
-        onTap: onTap,
-        itemCount: children.length);
+        offsetCenter: offsetCenter!,
+        scaleCenter: scaleCenter!,
+        itemCount: children!.length);
   }
 
   factory SliderCarousel.list({
-    List list,
-    CustomLayoutOption customLayoutOption,
-    SliderCarouselDataBuilder builder,
+    List? list,
+    required CustomLayoutOption customLayoutOption,
+    SliderCarouselDataBuilder? builder,
     bool autoplay: false,
     int autoplayDelay: defaultAutoplayDelayMs,
     bool reverse: false,
     bool autoplayDisableOnInteraction: true,
     int duration: defaultAutoplayTransactionDuration,
-    ValueChanged<int> onIndexChanged,
-    int index,
+    ValueChanged<int>? onIndexChanged,
+    int? index,
     bool loop: true,
     Curve curve: Curves.ease,
     Axis scrollDirection: Axis.horizontal,
-    SliderCarouselController controller,
-    Key key,
-    double itemHeight,
-    double itemWidth,
-    double offsetCenter,
-    double scaleCenter,
-    SliderCarouselOnTap onTap,
+    SliderCarouselController? controller,
+    Key? key,
+    double? itemHeight,
+    double? itemWidth,
+    double? offsetCenter,
+    double? scaleCenter,
   }) {
     return new SliderCarousel(
         itemHeight: itemHeight,
@@ -137,12 +136,11 @@ class SliderCarousel extends StatefulWidget {
         controller: controller,
         loop: loop,
         itemBuilder: (BuildContext context, int index) {
-          return builder(context, list[index], index);
+          return builder!(context, list![index], index);
         },
-        offsetCenter: offsetCenter,
-        scaleCenter: scaleCenter,
-        onTap: onTap,
-        itemCount: list.length);
+        offsetCenter: offsetCenter!,
+        scaleCenter: scaleCenter!,
+        itemCount: list!.length);
   }
 
   @override
@@ -152,13 +150,14 @@ class SliderCarousel extends StatefulWidget {
 }
 
 abstract class _SliderCarouselTimerMixin extends State<SliderCarousel> {
-  Timer _timer;
+  Timer? _timer;
 
-  SliderCarouselController _controller;
+  late SliderCarouselController _controller;
 
   @override
   void initState() {
-    _controller = widget.controller;
+    _controller = widget.controller!;
+    // ignore: unnecessary_null_comparison
     if (_controller == null) {
       _controller = new SliderCarouselController();
     }
@@ -190,8 +189,8 @@ abstract class _SliderCarouselTimerMixin extends State<SliderCarousel> {
   void didUpdateWidget(SliderCarousel oldWidget) {
     if (_controller != oldWidget.controller) {
       if (oldWidget.controller != null) {
-        oldWidget.controller.removeListener(_onController);
-        _controller = oldWidget.controller;
+        oldWidget.controller!.removeListener(_onController);
+        _controller = oldWidget.controller!;
         _controller.addListener(_onController);
       }
     }
@@ -201,10 +200,7 @@ abstract class _SliderCarouselTimerMixin extends State<SliderCarousel> {
 
   @override
   void dispose() {
-    if (_controller != null) {
-      _controller.removeListener(_onController);
-      //  _controller.dispose();
-    }
+    _controller.removeListener(_onController);
 
     _stopAutoplay();
     super.dispose();
@@ -234,27 +230,16 @@ abstract class _SliderCarouselTimerMixin extends State<SliderCarousel> {
 
   void _stopAutoplay() {
     if (_timer != null) {
-      _timer.cancel();
+      _timer!.cancel();
       _timer = null;
     }
   }
 }
 
 class _SliderCarouselState extends _SliderCarouselTimerMixin {
-  int _activeIndex;
+  late int _activeIndex;
 
-  TransformerPageController _pageController;
-
-  Widget _wrapTap(BuildContext context, int index) {
-    return new GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        this.widget.onTap(index);
-      },
-      child: widget.itemBuilder(context, index),
-    );
-  }
-
+  TransformerPageController? _pageController;
   @override
   void initState() {
     _activeIndex = widget.index ?? 0;
@@ -273,36 +258,34 @@ class _SliderCarouselState extends _SliderCarouselTimerMixin {
     scheduleMicrotask(() {
       // So that we have a chance to do `removeListener` in child widgets.
       if (_pageController != null) {
-        _pageController.dispose();
+        _pageController?.dispose();
         _pageController = null;
       }
     });
     if (widget.index != null && widget.index != _activeIndex) {
-      _activeIndex = widget.index;
+      _activeIndex = widget.index!;
     }
   }
 
   void _onIndexChanged(int index) {
-    setState(() {
-      _activeIndex = index;
-    });
+    if (mounted) {
+      setState(() {
+        _activeIndex = index;
+      });
+    }
     if (widget.onIndexChanged != null) {
-      widget.onIndexChanged(index);
+      widget.onIndexChanged!(index);
     }
   }
 
   Widget _buildSliderCarousel() {
-    IndexedWidgetBuilder itemBuilder;
+    late IndexedWidgetBuilder itemBuilder;
+    itemBuilder = widget.itemBuilder!;
 
-    if (widget.onTap != null) {
-      itemBuilder = _wrapTap;
-    } else {
-      itemBuilder = widget.itemBuilder;
-    }
     return new _StackSliderCarousel(
       loop: widget.loop,
-      itemWidth: widget.itemWidth,
-      itemHeight: widget.itemHeight,
+      itemWidth: widget.itemWidth!,
+      itemHeight: widget.itemHeight!,
       itemCount: widget.itemCount,
       itemBuilder: itemBuilder,
       index: _activeIndex,
@@ -319,7 +302,7 @@ class _SliderCarouselState extends _SliderCarouselTimerMixin {
   @override
   Widget build(BuildContext context) {
     Widget sliderCarousel = _buildSliderCarousel();
-    List<Widget> listForStack;
+    List<Widget>? listForStack;
     if (listForStack != null) {
       return new Stack(
         children: listForStack,
@@ -328,26 +311,25 @@ class _SliderCarouselState extends _SliderCarouselTimerMixin {
 
     return sliderCarousel;
   }
-
 }
 
 abstract class _SubSliderCarousel extends StatefulWidget {
-  final IndexedWidgetBuilder itemBuilder;
-  final int itemCount;
-  final int index;
-  final ValueChanged<int> onIndexChanged;
-  final SliderCarouselController controller;
-  final int duration;
-  final Curve curve;
-  final double itemWidth;
-  final double itemHeight;
+  final IndexedWidgetBuilder? itemBuilder;
+  final int? itemCount;
+  final int? index;
+  final ValueChanged<int>? onIndexChanged;
+  final SliderCarouselController? controller;
+  final int? duration;
+  final Curve? curve;
+  final double? itemWidth;
+  final double? itemHeight;
   final double offsetCenter;
-  final double scaleCenter;
-  final bool loop;
-  final Axis scrollDirection;
+  final double? scaleCenter;
+  final bool? loop;
+  final Axis? scrollDirection;
 
   _SubSliderCarousel(
-      {Key key,
+      {Key? key,
       this.loop,
       this.itemHeight,
       this.itemWidth,
@@ -358,7 +340,7 @@ abstract class _SubSliderCarousel extends StatefulWidget {
       this.index,
       this.itemCount,
       this.scrollDirection: Axis.horizontal,
-      this.offsetCenter,
+      this.offsetCenter: 0,
       this.scaleCenter,
       this.onIndexChanged})
       : super(key: key);
@@ -368,9 +350,9 @@ abstract class _SubSliderCarousel extends StatefulWidget {
 
   int getCorrectIndex(int indexNeedsFix) {
     if (itemCount == 0) return 0;
-    int value = indexNeedsFix % itemCount;
+    int value = indexNeedsFix % itemCount!;
     if (value < 0) {
-      value += itemCount;
+      value += itemCount!;
     }
     return value;
   }
@@ -378,20 +360,20 @@ abstract class _SubSliderCarousel extends StatefulWidget {
 
 class _StackSliderCarousel extends _SubSliderCarousel {
   _StackSliderCarousel({
-    Key key,
-    Curve curve,
-    int duration,
-    SliderCarouselController controller,
-    ValueChanged<int> onIndexChanged,
-    double itemHeight,
-    double itemWidth,
-    IndexedWidgetBuilder itemBuilder,
-    int index,
-    bool loop,
-    int itemCount,
-    Axis scrollDirection,
-    double offsetCenter,
-    double scaleCenter,
+    Key? key,
+    Curve? curve,
+    int? duration,
+    SliderCarouselController? controller,
+    ValueChanged<int>? onIndexChanged,
+    double? itemHeight,
+    double? itemWidth,
+    IndexedWidgetBuilder? itemBuilder,
+    int? index,
+    bool? loop,
+    int? itemCount,
+    Axis? scrollDirection,
+    required double offsetCenter,
+    double? scaleCenter,
   }) : super(
             loop: loop,
             key: key,
@@ -415,9 +397,15 @@ class _StackSliderCarousel extends _SubSliderCarousel {
 }
 
 class _StackViewState extends _CustomLayoutStateBase<_StackSliderCarousel> {
-  List<double> scales;
-  List<double> offsets;
-  List<double> opacity;
+  late List<double> scales = [0.0, 1.0, 1.0, widget.scaleCenter ?? 0, 0.0];
+  late List<double> offsets = [
+    -(_sliderWidth - widget.itemWidth!) / 2,
+    (_sliderWidth - widget.itemWidth!) / 2 * widget.offsetCenter,
+    -(_sliderWidth - widget.itemWidth!) / 2 * widget.offsetCenter,
+    -scales[3] > 1 ? (widget.itemWidth! * (scales[3] - 1)) / 2 : 0,
+    _sliderHeight
+  ];
+  late List<double> opacity = [0.0, 1.0, 1.0, 1.0, 0.0];
 
   @override
   void didChangeDependencies() {
@@ -426,13 +414,27 @@ class _StackViewState extends _CustomLayoutStateBase<_StackSliderCarousel> {
 
   void _updateValues() {
     if (widget.scrollDirection == Axis.horizontal) {
-      double space = (_sliderWidth - widget.itemWidth) / 2;
-      double spaceItem = scales[3]>1?(widget.itemWidth*(scales[3]-1))/2:0;
-      offsets = [-space, space*widget.offsetCenter, -space*widget.offsetCenter, -spaceItem, _sliderWidth];
+      double space = (_sliderWidth - widget.itemWidth!) / 2;
+      double spaceItem =
+          scales[3] > 1 ? (widget.itemWidth! * (scales[3] - 1)) / 2 : 0;
+      offsets = [
+        -space,
+        space * widget.offsetCenter,
+        -space * widget.offsetCenter,
+        -spaceItem,
+        _sliderWidth
+      ];
     } else {
-      double space = (_sliderHeight - widget.itemHeight) / 2;
-      double spaceItem = scales[3]>1?(widget.itemHeight*(scales[3]-1))/2:0;
-      offsets = [-space, space*widget.offsetCenter, -space*widget.offsetCenter, -spaceItem, _sliderHeight];
+      double space = (_sliderHeight - widget.itemHeight!) / 2;
+      double spaceItem =
+          scales[3] > 1 ? (widget.itemHeight! * (scales[3] - 1)) / 2 : 0;
+      offsets = [
+        -space,
+        space * widget.offsetCenter,
+        -space * widget.offsetCenter,
+        -spaceItem,
+        _sliderHeight
+      ];
     }
   }
 
@@ -449,7 +451,7 @@ class _StackViewState extends _CustomLayoutStateBase<_StackSliderCarousel> {
     _animationCount = 5;
     //Array below this line, '0' index is 1.0 ,witch is the first item show in SliderCarousel.
     _startIndex = -3;
-    scales = [0.0, 1.0, 1.0, widget.scaleCenter, 0.0];
+    scales = [0.0, 1.0, 1.0, widget.scaleCenter ?? 0, 0.0];
     opacity = [0.0, 1.0, 1.0, 1.0, 0.0];
 
     _updateValues();
@@ -480,7 +482,7 @@ class _StackViewState extends _CustomLayoutStateBase<_StackSliderCarousel> {
           child: new SizedBox(
             width: widget.itemWidth ?? double.infinity,
             height: widget.itemHeight ?? double.infinity,
-            child: widget.itemBuilder(context, realIndex),
+            child: widget.itemBuilder!(context, realIndex),
           ),
         ),
       ),

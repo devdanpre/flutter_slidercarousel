@@ -1,6 +1,6 @@
 name: flutter_slidercarousel
 description: A new slider carousel widget with custom scaling and item spacing.
-version: 0.0.1+3
+version: 0.0.2
 #homepage: https://github.com/devdanpre/flutter_slidercarousel
 
 environment:

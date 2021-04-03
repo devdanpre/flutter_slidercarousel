@@ -1,4 +1,4 @@
-import 'package:transformer_page_view/transformer_page_view.dart';
+import 'package:mafya/core/init/transformer_page_view/another_transformer_page_view.dart';
 
 class SliderCarouselController extends IndexController {
   // Autoplay is started
@@ -14,14 +14,13 @@ class SliderCarouselController extends IndexController {
   // `SliderCarouselPluginConfig` is available.
   static const int BUILD = 5;
 
-
   // available when `event` == SliderCarouselController.SWIPE
   // this value is PageViewController.pos
-  double pos;
+  late double pos;
 
-  int index;
-  bool animation;
-  bool autoplay;
+  int? index;
+  late bool animation;
+  bool? autoplay;
 
   SliderCarouselController();
 

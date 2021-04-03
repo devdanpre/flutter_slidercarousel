@@ -1,13 +1,13 @@
 part of 'slidercarousel.dart';
 
-abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends State<T>
-    with SingleTickerProviderStateMixin {
-  double _sliderWidth;
-  double _sliderHeight;
-  Animation<double> _animation;
-  AnimationController _animationController;
-  int _startIndex;
-  int _animationCount;
+abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel>
+    extends State<T> with SingleTickerProviderStateMixin {
+  double _sliderWidth = 0;
+  double _sliderHeight = 0;
+  late Animation<double> _animation;
+  late AnimationController _animationController;
+  int _startIndex = 0;
+  int _animationCount = 5;
 
   @override
   void initState() {
@@ -17,7 +17,7 @@ abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends Stat
     }
 
     _createAnimationController();
-    widget.controller.addListener(_onController);
+    widget.controller!.addListener(_onController);
     super.initState();
   }
 
@@ -29,7 +29,7 @@ abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends Stat
 
   @override
   void didChangeDependencies() {
-    WidgetsBinding.instance.addPostFrameCallback(_getSize);
+    WidgetsBinding.instance!.addPostFrameCallback(_getSize);
     super.didChangeDependencies();
   }
 
@@ -39,22 +39,30 @@ abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends Stat
 
   @mustCallSuper
   void afterRender() {
-    RenderObject renderObject = context.findRenderObject();
-    Size size = renderObject.paintBounds.size;
+    RenderObject? renderObject = context.findRenderObject();
+    Size size;
+    if (renderObject == null) {
+      size = Size(0, 0);
+    } else {
+      size = renderObject.paintBounds.size;
+    }
+
     _sliderWidth = size.width;
     _sliderHeight = size.height;
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void didUpdateWidget(T oldWidget) {
     if (widget.controller != oldWidget.controller) {
-      oldWidget.controller.removeListener(_onController);
-      widget.controller.addListener(_onController);
+      oldWidget.controller!.removeListener(_onController);
+      widget.controller!.addListener(_onController);
     }
 
     if (widget.loop != oldWidget.loop) {
-      if (!widget.loop) {
+      if (!widget.loop!) {
         _currentIndex = _ensureIndex(_currentIndex);
       }
     }
@@ -63,17 +71,17 @@ abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends Stat
   }
 
   int _ensureIndex(int index) {
-    index = index % widget.itemCount;
+    index = index % widget.itemCount!;
     if (index < 0) {
-      index += widget.itemCount;
+      index += widget.itemCount!;
     }
     return index;
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_onController);
-    _animationController?.dispose();
+    widget.controller!.removeListener(_onController);
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -85,16 +93,16 @@ abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends Stat
     );
   }
 
-  Widget _buildAnimation(BuildContext context, Widget w) {
+  Widget _buildAnimation(BuildContext context, Widget? w) {
     List<Widget> list = [];
 
     double animationValue = _animation.value;
 
     for (int i = 0; i < _animationCount; ++i) {
       int realIndex = _currentIndex + i + _startIndex;
-      realIndex = realIndex % widget.itemCount;
+      realIndex = realIndex % widget.itemCount!;
       if (realIndex < 0) {
-        realIndex += widget.itemCount;
+        realIndex += widget.itemCount!;
       }
 
       list.add(_buildItem(i, realIndex, animationValue));
@@ -119,23 +127,25 @@ abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends Stat
       return new Container();
     }
     return new AnimatedBuilder(
-        animation: _animationController, builder: _buildAnimation);
+      animation: _animationController,
+      builder: _buildAnimation,
+    );
   }
 
-  double _currentValue;
-  double _currentPos;
+  double? _currentValue;
+  double? _currentPos;
 
   bool _lockScroll = false;
 
-  void _move(double position, {int nextIndex}) async {
+  void _move(double position, {int? nextIndex}) async {
     if (_lockScroll) return;
     try {
       _lockScroll = true;
       await _animationController.animateTo(position,
-          duration: new Duration(milliseconds: widget.duration),
-          curve: widget.curve);
+          duration: new Duration(milliseconds: widget.duration!),
+          curve: widget.curve!);
       if (nextIndex != null) {
-        widget.onIndexChanged(widget.getCorrectIndex(nextIndex));
+        widget.onIndexChanged!(widget.getCorrectIndex(nextIndex));
       }
     } catch (e) {
       print(e);
@@ -155,22 +165,22 @@ abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends Stat
 
   int _nextIndex() {
     int index = _currentIndex + 1;
-    if (!widget.loop && index >= widget.itemCount - 1) {
-      return widget.itemCount - 1;
+    if (!widget.loop! && index >= widget.itemCount! - 1) {
+      return widget.itemCount! - 1;
     }
     return index;
   }
 
   int _prevIndex() {
     int index = _currentIndex - 1;
-    if (!widget.loop && index < 0) {
+    if (!widget.loop! && index < 0) {
       return 0;
     }
     return index;
   }
 
   void _onController() {
-    switch (widget.controller.event) {
+    switch (widget.controller!.event) {
       case IndexController.PREVIOUS:
         int prevIndex = _prevIndex();
         if (prevIndex == _currentIndex) return;
@@ -198,12 +208,12 @@ abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends Stat
         : details.velocity.pixelsPerSecond.dy;
 
     if (_animationController.value >= 0.75 || velocity > 500.0) {
-      if (_currentIndex <= 0 && !widget.loop) {
+      if (_currentIndex <= 0 && !widget.loop!) {
         return;
       }
       _move(1.0, nextIndex: _currentIndex - 1);
     } else if (_animationController.value < 0.25 || velocity < -500.0) {
-      if (_currentIndex >= widget.itemCount - 1 && !widget.loop) {
+      if (_currentIndex >= widget.itemCount! - 1 && !widget.loop!) {
         return;
       }
       _move(0.0, nextIndex: _currentIndex + 1);
@@ -222,16 +232,16 @@ abstract class _CustomLayoutStateBase<T extends _SubSliderCarousel> extends Stat
 
   void _onPanUpdate(DragUpdateDetails details) {
     if (_lockScroll) return;
-    double value = _currentValue +
+    double value = _currentValue! +
         ((widget.scrollDirection == Axis.horizontal
                     ? details.globalPosition.dx
                     : details.globalPosition.dy) -
-                _currentPos) /
+                _currentPos!) /
             _sliderWidth /
             2;
     // no loop ?
-    if (!widget.loop) {
-      if (_currentIndex >= widget.itemCount - 1) {
+    if (!widget.loop!) {
+      if (_currentIndex >= widget.itemCount! - 1) {
         if (value < 0.5) {
           value = 0.5;
         }
@@ -282,13 +292,14 @@ Offset _getOffsetValue(List<Offset> values, double animationValue, int index) {
 
 abstract class TransformBuilder<T> {
   List<T> values;
-  TransformBuilder({this.values});
+  TransformBuilder({required this.values});
   Widget build(int i, double animationValue, Widget widget);
 }
 
 class ScaleTransformBuilder extends TransformBuilder<double> {
   final Alignment alignment;
-  ScaleTransformBuilder({List<double> values, this.alignment: Alignment.center})
+  ScaleTransformBuilder(
+      {required List<double> values, this.alignment: Alignment.center})
       : super(values: values);
 
   Widget build(int i, double animationValue, Widget widget) {
@@ -298,7 +309,8 @@ class ScaleTransformBuilder extends TransformBuilder<double> {
 }
 
 class OpacityTransformBuilder extends TransformBuilder<double> {
-  OpacityTransformBuilder({List<double> values}) : super(values: values);
+  OpacityTransformBuilder({required List<double> values})
+      : super(values: values);
 
   Widget build(int i, double animationValue, Widget widget) {
     double v = _getValue(values, animationValue, i);
@@ -310,7 +322,8 @@ class OpacityTransformBuilder extends TransformBuilder<double> {
 }
 
 class RotateTransformBuilder extends TransformBuilder<double> {
-  RotateTransformBuilder({List<double> values}) : super(values: values);
+  RotateTransformBuilder({required List<double> values})
+      : super(values: values);
 
   Widget build(int i, double animationValue, Widget widget) {
     double v = _getValue(values, animationValue, i);
@@ -322,7 +335,8 @@ class RotateTransformBuilder extends TransformBuilder<double> {
 }
 
 class TranslateTransformBuilder extends TransformBuilder<Offset> {
-  TranslateTransformBuilder({List<Offset> values}) : super(values: values);
+  TranslateTransformBuilder({required List<Offset> values})
+      : super(values: values);
 
   @override
   Widget build(int i, double animationValue, Widget widget) {
@@ -339,8 +353,7 @@ class CustomLayoutOption {
   final int startIndex;
   final int stateCount;
 
-  CustomLayoutOption({this.stateCount, this.startIndex})
-      : assert(startIndex != null, stateCount != null);
+  CustomLayoutOption({required this.stateCount, required this.startIndex});
 
   CustomLayoutOption addOpacity(List<double> values) {
     builders.add(new OpacityTransformBuilder(values: values));
@@ -368,33 +381,32 @@ class _CustomLayoutSliderCarousel extends _SubSliderCarousel {
   final CustomLayoutOption option;
 
   _CustomLayoutSliderCarousel(
-      {this.option,
-      double itemWidth,
-      bool loop,
-      double itemHeight,
-      ValueChanged<int> onIndexChanged,
-      Key key,
-      IndexedWidgetBuilder itemBuilder,
-      Curve curve,
-      int duration,
-      int index,
-      int itemCount,
-      Axis scrollDirection,
-      SliderCarouselController controller})
-      : assert(option != null),
-        super(
-            loop: loop,
-            onIndexChanged: onIndexChanged,
-            itemWidth: itemWidth,
-            itemHeight: itemHeight,
-            key: key,
-            itemBuilder: itemBuilder,
-            curve: curve,
-            duration: duration,
-            index: index,
-            itemCount: itemCount,
-            controller: controller,
-            scrollDirection: scrollDirection);
+      {required this.option,
+      double? itemWidth,
+      bool? loop,
+      double? itemHeight,
+      ValueChanged<int>? onIndexChanged,
+      Key? key,
+      IndexedWidgetBuilder? itemBuilder,
+      Curve? curve,
+      int? duration,
+      int? index,
+      int? itemCount,
+      Axis? scrollDirection,
+      SliderCarouselController? controller})
+      : super(
+            loop: loop!,
+            onIndexChanged: onIndexChanged!,
+            itemWidth: itemWidth!,
+            itemHeight: itemHeight!,
+            key: key!,
+            itemBuilder: itemBuilder!,
+            curve: curve!,
+            duration: duration!,
+            index: index!,
+            itemCount: itemCount!,
+            controller: controller!,
+            scrollDirection: scrollDirection!);
 
   @override
   State<StatefulWidget> createState() {
@@ -402,7 +414,8 @@ class _CustomLayoutSliderCarousel extends _SubSliderCarousel {
   }
 }
 
-class _CustomLayoutState extends _CustomLayoutStateBase<_CustomLayoutSliderCarousel> {
+class _CustomLayoutState
+    extends _CustomLayoutStateBase<_CustomLayoutSliderCarousel> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -424,7 +437,7 @@ class _CustomLayoutState extends _CustomLayoutStateBase<_CustomLayoutSliderCarou
     Widget child = new SizedBox(
         width: widget.itemWidth ?? double.infinity,
         height: widget.itemHeight ?? double.infinity,
-        child: widget.itemBuilder(context, realIndex));
+        child: widget.itemBuilder!(context, realIndex));
 
     for (int i = builders.length - 1; i >= 0; --i) {
       TransformBuilder builder = builders[i];
